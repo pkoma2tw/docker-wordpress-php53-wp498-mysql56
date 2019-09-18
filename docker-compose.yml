@@ -1,0 +1,35 @@
+version: '3.6'
+
+services:
+   db-for-wp:
+     image: mysql:5.5.60
+     container_name: db-for-wp
+     ports:
+       - "3306:3306"
+     volumes:
+      - db-for-wp-data-volume:/var/lib/mysql
+      - ./dev/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+     environment:
+       MYSQL_ROOT_PASSWORD: password
+       MYSQL_DATABASE: wordpress
+       MYSQL_USER: wordpress
+       MYSQL_PASSWORD: password
+
+   wp:
+     build: ./dev/wordpress
+     depends_on:
+       - db-for-wp
+     container_name: wp
+     ports:
+       - "9080:80"
+     volumes:
+      - ./wordpress/wp-content/themes:/var/www/html/wp-content/themes
+      - ./wordpress/wp-content/plugins:/var/www/html/wp-content/plugins
+      - ./wordpress/wp-content/uploads:/var/www/html/wp-content/uploads
+     environment:
+       WORDPRESS_DB_HOST: db-for-wp:3306
+       WORDPRESS_DB_USER: wordpress
+       WORDPRESS_DB_PASSWORD: password
+
+volumes:
+     db-for-wp-data-volume:
